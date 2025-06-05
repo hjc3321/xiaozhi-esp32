@@ -186,6 +186,11 @@ elseif(CONFIG_BOARD_TYPE_ESP32_S3_1_54_MUMA)
     set(BOARD_TYPE "sp-esp32-s3-1.54-muma")
 elseif(CONFIG_BOARD_TYPE_ESP32_S3_1_28_BOX)
     set(BOARD_TYPE "sp-esp32-s3-1.28-box")
+elseif(CONFIG_BOARD_TYPE_ESP32_TOUDH_SD)
+    set(BOARD_TYPE "esp32-touch-sd")
+    set(COMPONENT_REQUIRES "esp_lcd_touch_xpt2046")  
+    set(BOARD_SPEC_SOURCES "lvgl_conf/lv_mem_custom.c")
+    list(APPEND SOURCES ${BOARD_SPEC_SOURCES})
 endif()
 file(GLOB BOARD_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/boards/${BOARD_TYPE}/*.cc
@@ -304,4 +309,10 @@ spiffs_create_partition_assets(
     FLASH_IN_PROJECT
     MMAP_FILE_SUPPORT_FORMAT ".aaf"
 )
+
+# 添加spiffs分区配置
+if(CONFIG_BOARD_TYPE_ESP32_TOUDH_SD)
+    spiffs_create_partition_image(storage ${CMAKE_CURRENT_SOURCE_DIR}/assets/emotions FLASH_IN_PROJECT)
+endif()
+
 endif()
