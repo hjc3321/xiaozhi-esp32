@@ -268,6 +268,12 @@ add_custom_target(lang_header ALL
     DEPENDS ${LANG_HEADER}
 )
 
+# 添加spiffs分区配置
+if(CONFIG_BOARD_TYPE_ESP32_TOUDH_SD)
+    spiffs_create_partition_image(storage ${CMAKE_CURRENT_SOURCE_DIR}/assets/emotions FLASH_IN_PROJECT)
+endif()
+
+
 if(CONFIG_BOARD_TYPE_ESP_HI)
 set(URL "https://github.com/espressif2022/image_player/raw/main/test_apps/test_8bit")
 set(SPIFFS_DIR "${CMAKE_BINARY_DIR}/emoji")
@@ -309,10 +315,5 @@ spiffs_create_partition_assets(
     FLASH_IN_PROJECT
     MMAP_FILE_SUPPORT_FORMAT ".aaf"
 )
-
-# 添加spiffs分区配置
-if(CONFIG_BOARD_TYPE_ESP32_TOUDH_SD)
-    spiffs_create_partition_image(storage ${CMAKE_CURRENT_SOURCE_DIR}/assets/emotions FLASH_IN_PROJECT)
-endif()
 
 endif()
