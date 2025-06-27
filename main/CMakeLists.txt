@@ -189,8 +189,12 @@ elseif(CONFIG_BOARD_TYPE_ESP32_S3_1_28_BOX)
 elseif(CONFIG_BOARD_TYPE_ESP32_TOUDH_SD)
     set(BOARD_TYPE "esp32-touch-sd")
     set(COMPONENT_REQUIRES "esp_lcd_touch_xpt2046")  
-    set(BOARD_SPEC_SOURCES "lvgl_conf/lv_mem_custom.c")
+    set(BOARD_SPEC_SOURCES "lvgl_conf/lv_mem_custom.c")        
     list(APPEND SOURCES ${BOARD_SPEC_SOURCES})
+    file(GLOB BOARD_FEATURE_SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/features/web_search/*.cc
+    )
+    list(APPEND SOURCES ${BOARD_FEATURE_SOURCES})
 endif()
 file(GLOB BOARD_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/boards/${BOARD_TYPE}/*.cc
@@ -227,6 +231,7 @@ set(LANG_JSON "${CMAKE_CURRENT_SOURCE_DIR}/assets/${LANG_DIR}/language.json")
 set(LANG_HEADER "${CMAKE_CURRENT_SOURCE_DIR}/assets/lang_config.h")
 file(GLOB LANG_SOUNDS ${CMAKE_CURRENT_SOURCE_DIR}/assets/${LANG_DIR}/*.p3)
 file(GLOB COMMON_SOUNDS ${CMAKE_CURRENT_SOURCE_DIR}/assets/common/*.p3)
+file(GLOB CERTS ${CMAKE_CURRENT_SOURCE_DIR}/assets/cert/*.pem)
 
 # 如果目标芯片是 ESP32，则排除特定文件
 if(CONFIG_IDF_TARGET_ESP32)
@@ -237,7 +242,7 @@ if(CONFIG_IDF_TARGET_ESP32)
 endif()
 
 idf_component_register(SRCS ${SOURCES}
-                    EMBED_FILES ${LANG_SOUNDS} ${COMMON_SOUNDS}
+                    EMBED_FILES ${LANG_SOUNDS} ${COMMON_SOUNDS} ${CERTS}
                     INCLUDE_DIRS ${INCLUDE_DIRS}
                     WHOLE_ARCHIVE
                     )

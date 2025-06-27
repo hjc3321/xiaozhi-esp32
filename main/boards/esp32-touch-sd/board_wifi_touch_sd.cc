@@ -34,6 +34,7 @@
 #include "mcp_server.h"
 
 #include "time_manager.h"
+#include "features/web_search/web_search.h"
 
 #if defined(LCD_TYPE_GC9A01_SERIAL)
 #include "esp_lcd_gc9a01.h"
@@ -218,7 +219,7 @@ private:
         thing_manager.AddThing(iot::CreateThing("ClockAlarm"));
     }
 
-    void InitializeTools() {
+    void AddAlarmClock() { 
         auto& mcp_server = McpServer::GetInstance();
 
         const char *clock_alarmer_desc = R"delimeter(设置闹钟，支持添加闹钟（包括一次性闹钟，每天重复、每周重复、每月重复的周期性闹钟），删除闹钟，修改闹钟时间，命令的参数如下：
@@ -248,6 +249,37 @@ private:
 
             return true;
         });
+    }
+
+    void AddWebSearch() { 
+        auto& mcp_server = McpServer::GetInstance();
+
+        const char *web_search_desc = R"delimeter(联网搜索工具，用户问题涉及到联网搜索，例如查询新闻消息，调用该工具执行搜索，并将搜索结果总结要点后告诉用户，事件要告诉用户事件发生的时间、经过和最后结果，不要遗漏关键信息。输入参数query为搜索关键字，返回值为搜索的内容;
+)delimeter";
+
+        mcp_server.AddTool("self.web.search", web_search_desc, PropertyList({
+            Property("query", kPropertyTypeString)         
+        }), [this](const PropertyList& properties) -> ReturnValue {
+            auto query = properties["query"].value<std::string>();
+            std::string result = "";         
+            int ret = web_search(query.c_str(), result, 1);   
+            if (ret <= 0) {
+                result = "没有搜索到结果";
+                ESP_LOGI(TAG, "联网搜索：%s, 没有搜索到结果", query.c_str());
+            }else {
+                ESP_LOGI(TAG, "联网搜索：%s, 搜到%d条结果，内容长度%d", query.c_str(), ret, result.size());
+            }
+            if (result.size() > 5000) {
+                ESP_LOGI(TAG, "联网搜索结果长度超过5000，截断返回:%s", result.substr(0, 5000).c_str());
+                return "搜索结果: " + result.substr(0, 5000) + "...";
+            }
+            return "搜索结果：" + result + "\n";
+        });
+    }
+
+    void InitializeTools() {
+        AddAlarmClock();        
+        AddWebSearch();
     }
 
 public:
